@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Added** `PublicActivity.parameters_type` to declare the type of the `parameters` column, skipping the schema lookup that opened a database connection while the `Activity` class was loading (s. #394)
+
 ## 3.0.2
 
 - **Fixed** Refactor prepare_parameters method to handle nil parameters (s. #387, thanks [Himalaya Pal](https://github.com/palhimalaya))

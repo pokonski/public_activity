@@ -14,6 +14,7 @@ recorded activities to users - similarly to how GitHub does it.
 - [Setup](#setup)
   - [Gem installation](#gem-installation)
   - [Database setup](#database-setup)
+    - [Avoiding a database connection at boot](#avoiding-a-database-connection-at-boot)
   - [Model configuration](#model-configuration)
     - [Custom activities](#custom-activities)
   - [Displaying activities](#displaying-activities)
@@ -91,6 +92,34 @@ end
 
     rails g public_activity:migration
     rake db:migrate
+
+#### Avoiding a database connection at boot
+
+**(ActiveRecord only)** To decide how to serialize the `parameters` column,
+_public_activity_ inspects the `activities` table while the `Activity` class is
+being loaded. That opens a database connection during boot, which is a problem
+when the database is unreachable — most commonly when precompiling assets in a
+container build, where the connection attempt may hang rather than fail.
+
+Declare the column type up front to skip the lookup entirely:
+
+```ruby
+# config/initializers/public_activity.rb
+PublicActivity::Config.set do
+  parameters_type :text
+end
+```
+
+or, equivalently:
+
+```ruby
+PublicActivity.parameters_type = :text
+```
+
+Use the type the column actually has: `:text` for the migration this gem
+generates, or `:json`, `:jsonb` or `:hstore` if you have changed it — those
+three are stored without serialization. Left unset, the type is detected from
+the schema as before.
 
 ### Model configuration
 
