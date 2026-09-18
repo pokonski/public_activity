@@ -13,6 +13,7 @@ module PublicActivity
     #     orm :mongo_mapper
     #     enabled false
     #     table_name "activities"
+    #     parameters_type :json
     #   end
     def self.set(&block)
       b = Block.new
@@ -21,6 +22,7 @@ module PublicActivity
       orm(b.orm) unless b.orm.nil?
       enabled(b.enabled) unless b.enabled.nil?
       table_name(b.table_name) unless b.table_name.nil?
+      parameters_type(b.parameters_type) unless b.parameters_type.nil?
     end
 
     # alias for {#orm}
@@ -33,6 +35,12 @@ module PublicActivity
     # @see #enabled
     def self.enabled=(value = nil)
       enabled(value)
+    end
+
+    # alias for {#parameters_type}
+    # @see #parameters_type
+    def self.parameters_type=(type = nil)
+      parameters_type(type)
     end
 
     # instance version of {Config#orm}
@@ -51,6 +59,12 @@ module PublicActivity
     # @see Config#orm
     def enabled(value = nil)
       self.class.enabled(value)
+    end
+
+    # instance version of {Config#parameters_type}
+    # @see Config#parameters_type
+    def parameters_type(type = nil)
+      self.class.parameters_type(type)
     end
 
     # Set the ORM for use by PublicActivity.
@@ -79,6 +93,19 @@ module PublicActivity
       end
     end
 
+    # Sets the column type of the activity +parameters+ column.
+    #
+    # When set, PublicActivity trusts this instead of inspecting the database
+    # schema, so that loading the Activity class does not open a database
+    # connection. Leave unset (+nil+) to detect the type from the schema.
+    def self.parameters_type(type = nil)
+      if type.nil?
+        Thread.current[:public_activity_parameters_type]
+      else
+        Thread.current[:public_activity_parameters_type] = type.to_sym
+      end
+    end
+
     # Provides simple DSL for the config block.
     class Block
       # @see Config#orm
@@ -95,6 +122,11 @@ module PublicActivity
       # Sets the table_name for the model
       def table_name(name = nil)
         @table_name = (name.nil? ? @table_name : name)
+      end
+
+      # Sets the column type of the activity parameters column
+      def parameters_type(type = nil)
+        @parameters_type = (type.nil? ? @parameters_type : type)
       end
     end
   end

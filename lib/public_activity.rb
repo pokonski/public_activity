@@ -41,6 +41,24 @@ module PublicActivity
     config.enabled
   end
 
+  # Returns the column type configured for the activity +parameters+ column,
+  # or +nil+ when it should be detected from the database schema.
+  # @return [Symbol, nil]
+  # @since 3.1.0
+  def self.parameters_type
+    config.parameters_type
+  end
+
+  # Declares the column type of the activity +parameters+ column.
+  #
+  # Setting this skips schema detection, and with it the database connection
+  # that PublicActivity would otherwise open while the Activity class loads.
+  # @param value [Symbol] for example +:text+, +:json+ or +:jsonb+
+  # @since 3.1.0
+  def self.parameters_type=(value)
+    config.parameters_type(value)
+  end
+
   # Returns PublicActivity's configuration object.
   # @since 0.5.0
   def self.config
